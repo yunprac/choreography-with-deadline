@@ -14,71 +14,19 @@ import java.util.Date;
 @Data
 
 public class Delivery  {
-
     
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    
-    
-    
-    
-    
+    // @GeneratedValue(strategy=GenerationType.AUTO) // FOCUS: disable auto-gen for key. 
     private String orderId;
-    
-    
-    
-    
-    
+
     private String productId;
-    
-    
-    
-    
-    
     private String productName;
-    
-    
-    
-    
-    
     private Integer qty;
-    
-    
-    
-    
-    
     private String customerId;
-    
-    
-    
-    
-    
     private String address;
-    
-    
-    
-    
     
     private String status;
 
-    @PostPersist
-    public void onPostPersist(){
-
-
-        DeliveryStarted deliveryStarted = new DeliveryStarted(this);
-        deliveryStarted.publishAfterCommit();
-
-
-
-        DeliveryFailed deliveryFailed = new DeliveryFailed(this);
-        deliveryFailed.publishAfterCommit();
-
-
-
-        DeliveryCancelled deliveryCancelled = new DeliveryCancelled(this);
-        deliveryCancelled.publishAfterCommit();
-
-    }
 
     public static DeliveryRepository repository(){
         DeliveryRepository deliveryRepository = DeliveryApplication.applicationContext.getBean(DeliveryRepository.class);
@@ -86,55 +34,31 @@ public class Delivery  {
     }
 
 
-
-
     public static void startDelivery(OrderCreated orderCreated){
 
-        /** Example 1:  new item 
         Delivery delivery = new Delivery();
+        delivery.setOrderId(String.valueOf(orderCreated.getId()));      // Prevent duplicate execution of the same message
+        delivery.setCustomerId(orderCreated.getCustomerId());
+        delivery.setProductId(orderCreated.getProductId());
+        delivery.setProductName(orderCreated.getProductName());
+        delivery.setQty(orderCreated.getQty());
         repository().save(delivery);
 
-        DeliveryFailed deliveryFailed = new DeliveryFailed(delivery);
-        deliveryFailed.publishAfterCommit();
         DeliveryStarted deliveryStarted = new DeliveryStarted(delivery);
-        deliveryStarted.publishAfterCommit();
-        */
-
-        /** Example 2:  finding and process
-        
-        repository().findById(orderCreated.get???()).ifPresent(delivery->{
-            
-            delivery // do something
-            repository().save(delivery);
-
-            DeliveryFailed deliveryFailed = new DeliveryFailed(delivery);
-            deliveryFailed.publishAfterCommit();
-            DeliveryStarted deliveryStarted = new DeliveryStarted(delivery);
-            deliveryStarted.publishAfterCommit();
-
-         });
-        */
-
-        
+        deliveryStarted.publishAfterCommit();        
     }
+
     public static void compensate(OrderRejected orderRejected){
-
-        /** Example 1:  new item 
-        Delivery delivery = new Delivery();
-        repository().save(delivery);
-
-        */
-
-        /** Example 2:  finding and process
         
-        repository().findById(orderRejected.get???()).ifPresent(delivery->{
-            
-            delivery // do something
-            repository().save(delivery);
-
-
-         });
-        */
+        repository().findByOrderId(String.valueOf(orderRejected.getId())).ifPresent/*OrElse*/(delivery->{
+            new DeliveryCancelled(delivery).publishAfterCommit();
+            repository().delete(delivery);
+         }
+         
+        //, ()->{
+        //     throw new RuntimeException("No Delivery transaction is found for orderId" + orderRejected.getId());
+        //  }
+         );
 
         
     }
