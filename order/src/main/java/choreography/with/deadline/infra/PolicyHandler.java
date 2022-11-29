@@ -44,6 +44,7 @@ public class PolicyHandler{
         Order.reject(event);
         
     }
+
     @StreamListener(value=KafkaProcessor.INPUT, condition="headers['type']=='StockDecreaseFailed'")
     public void wheneverStockDecreaseFailed_Reject(@Payload StockDecreaseFailed stockDecreaseFailed){
 
@@ -55,6 +56,16 @@ public class PolicyHandler{
         
     }
 
+    @StreamListener(value=KafkaProcessor.INPUT, condition="headers['type']=='DeadlineReached'")
+    public void wheneverDeadlineReached_Reject(@Payload DeadlineReached deadlineReached){
+
+        DeadlineReached event = deadlineReached;
+        System.out.println("\n\n##### listener Reject : " + deadlineReached + "\n\n");
+
+        // Sample Logic //
+        Order.reject(event);
+        
+    }
 }
 
 

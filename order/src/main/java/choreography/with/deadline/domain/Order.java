@@ -76,5 +76,16 @@ public class Order  {
          });
     }
 
+    public static void reject(DeadlineReached deadlineReached) {
+        repository().findById(Long.valueOf(deadlineReached.getOrderId())).ifPresent(order->{
+            
+            order.setStatus("REJECTED DUE TO DEADLINE");
+            repository().save(order);
+
+            OrderRejected orderRejected = new OrderRejected(order);
+            orderRejected.publishAfterCommit();
+         });
+    }
+
 
 }

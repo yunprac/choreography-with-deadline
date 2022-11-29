@@ -2,6 +2,7 @@ package choreography.with.deadline.infra;
 
 import javax.naming.NameParser;
 import javax.transaction.Transactional;
+//import org.springframework.transaction.annotation.Transactional;
 import choreography.with.deadline.config.kafka.KafkaProcessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,8 +13,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import choreography.with.deadline.domain.*;
 
+
+import choreography.with.deadline.domain.*;
 
 @Service
 @Transactional
@@ -29,7 +31,6 @@ public class PolicyHandler{
     public void wheneverOrderCreated_Schedule(@Payload OrderCreated orderCreated){
 
         OrderCreated event = orderCreated;
-        System.out.println("\n\n##### listener Schedule : " + orderCreated + "\n\n");
 
         // Sample Logic //
         Deadline.schedule(event);
@@ -39,17 +40,15 @@ public class PolicyHandler{
     public void wheneverOrderPlaced_delete(@Payload OrderPlaced orderPlaced){
 
         OrderPlaced event = orderPlaced;
-        System.out.println("\n\n##### listener RemoveDeadline : " + orderPlaced + "\n\n");
 
         // Sample Logic //
-        Deadline.removeDeadline(event);       
+        Deadline.delete(event);       
     }
 
     @StreamListener(value=KafkaProcessor.INPUT, condition="headers['type']=='OrderRejected'")
     public void wheneverOrderPlaced_delete(@Payload OrderRejected orderRejected){
 
         OrderRejected event = orderRejected;
-        System.out.println("\n\n##### listener RemoveDeadline : " + orderRejected + "\n\n");
 
         // Sample Logic //
         Deadline.delete(event);       

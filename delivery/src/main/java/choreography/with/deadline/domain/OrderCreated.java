@@ -17,6 +17,6 @@ public class OrderCreated extends AbstractEvent {
     private String address;
     private String status;    
 }
-}
+
 
 

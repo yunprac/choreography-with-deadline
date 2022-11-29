@@ -3,7 +3,7 @@ package choreography.with.deadline.domain;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
-import choreography.with.idempotency.ProductApplication;
+import choreography.with.deadline.ProductApplication;
 import lombok.Data;
 
 @Entity

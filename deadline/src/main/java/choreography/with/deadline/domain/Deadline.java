@@ -3,6 +3,9 @@ package choreography.with.deadline.domain;
 import choreography.with.deadline.domain.DeadlineReached;
 import choreography.with.deadline.DeadlineApplication;
 import javax.persistence.*;
+
+import org.springframework.beans.factory.annotation.Value;
+
 import java.util.List;
 import lombok.Data;
 import java.util.Date;
@@ -12,7 +15,8 @@ import java.util.Date;
 @Data
 
 public class Deadline  {
-    static final int deadlineDurationInMS = 5 * 1000;  //FOCUS: 데드라인 5초
+    @Value("${deadline.duration.timemillis}")
+    static final int deadlineDurationInMS;
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -35,35 +39,31 @@ public class Deadline  {
         deadline.setDeadline(deadlineDate);
         
         repository().save(deadline);
-        
     }
 
     public static void delete(OrderPlaced orderPlaced) {
         repository().findByOrderId(orderPlaced.getId()).ifPresentOrElse(deadline ->{
             repository().delete(deadline);
-        }, ()->{throw new RuntimeException("No such order id" + orderPlaced.getId());});
+        }, ()->{throw new RuntimeException("No such order id :" + orderPlaced.getId());});
 
     }
 
     public static void delete(OrderRejected orderRejected) {
         repository().findByOrderId(orderRejected.getId()).ifPresentOrElse(deadline ->{
             repository().delete(deadline);
-        }, ()->{throw new RuntimeException("No such order id" + orderRejected.getId());});
+        }, ()->{throw new RuntimeException("No such order id :" + orderRejected.getId());});
 
     }
 
     public static void sendDeadlineEvents(){
-
         repository().findAll().forEach(deadline ->{
             Date now = new Date();
             
             if(now.after(deadline.getDeadline())){
-                repository().delete(deadline);  //FOCUS: DeadlineReached Event Pub. 이후에 deadline 없애야 
+                repository().delete(deadline);   
                 new DeadlineReached(deadline).publishAfterCommit();
-
             }
         });
-
     }
 
 }

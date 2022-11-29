@@ -3,6 +3,9 @@ server:
 spring:
   application:
     name: deadline
+deadline:
+  duration:
+    timemillis: 10000   
 ---
 
 spring:
