@@ -1,17 +1,11 @@
 package choreography.with.deadline.infra;
 
-import javax.naming.NameParser;
-import javax.transaction.Transactional;
-//import org.springframework.transaction.annotation.Transactional;
+// import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import choreography.with.deadline.config.kafka.KafkaProcessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 
@@ -19,8 +13,6 @@ import choreography.with.deadline.domain.*;
 
 @Service
 @Transactional
-@Configuration
-@EnableScheduling
 public class PolicyHandler{
     @Autowired DeadlineRepository deadlineRepository;
     
@@ -45,16 +37,7 @@ public class PolicyHandler{
         Deadline.delete(event);       
     }
 
-    @StreamListener(value=KafkaProcessor.INPUT, condition="headers['type']=='OrderRejected'")
-    public void wheneverOrderPlaced_delete(@Payload OrderRejected orderRejected){
-
-        OrderRejected event = orderRejected;
-
-        // Sample Logic //
-        Deadline.delete(event);       
-    }
-
-    @Scheduled(fixedRate = 5000) //FOCUS: every 5 seconds. 5초에 한번씩
+    // @Scheduled(fixedRate = 5000) 간혹, Unexpected error occurred in scheduled task 오류 발생.. @Scheduled @Transactional 분리권고에 따라 DeadlineScheduler 추가 
     public void checkDeadline(){
         Deadline.sendDeadlineEvents();
     }

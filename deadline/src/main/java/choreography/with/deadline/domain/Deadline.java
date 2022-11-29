@@ -3,9 +3,6 @@ package choreography.with.deadline.domain;
 import choreography.with.deadline.domain.DeadlineReached;
 import choreography.with.deadline.DeadlineApplication;
 import javax.persistence.*;
-
-import org.springframework.beans.factory.annotation.Value;
-
 import java.util.List;
 import lombok.Data;
 import java.util.Date;
@@ -15,8 +12,7 @@ import java.util.Date;
 @Data
 
 public class Deadline  {
-    @Value("${deadline.duration.timemillis}")
-    static final int deadlineDurationInMS;
+    static final int deadlineDurationInMS = 10 * 1000;  //FOCUS: 데드라인 10초
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -47,14 +43,7 @@ public class Deadline  {
         }, ()->{throw new RuntimeException("No such order id :" + orderPlaced.getId());});
 
     }
-
-    public static void delete(OrderRejected orderRejected) {
-        repository().findByOrderId(orderRejected.getId()).ifPresentOrElse(deadline ->{
-            repository().delete(deadline);
-        }, ()->{throw new RuntimeException("No such order id :" + orderRejected.getId());});
-
-    }
-
+    
     public static void sendDeadlineEvents(){
         repository().findAll().forEach(deadline ->{
             Date now = new Date();

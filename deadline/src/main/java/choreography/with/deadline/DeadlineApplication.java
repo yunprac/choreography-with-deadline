@@ -8,7 +8,6 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 
 @SpringBootApplication
 @EnableBinding(KafkaProcessor.class)
-//@EnableScheduling
 public class DeadlineApplication {
     public static ApplicationContext applicationContext;
     public static void main(String[] args) {
